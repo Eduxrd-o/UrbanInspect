@@ -11,7 +11,7 @@ import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
   standalone: true,
   templateUrl: './incidents-list.page.html',
   styleUrls: ['./incidents-list.page.scss'],
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule]
+  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, RouterModule]
 })
 export class IncidentsListPage implements OnInit {
 
