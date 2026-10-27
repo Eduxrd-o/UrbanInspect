@@ -20,20 +20,18 @@ export interface Incident {
 @Injectable({ providedIn: 'root' })
 export class IncidentService {
   private http = inject(HttpClient);
-
   private apiUrl = 'https://6ae10789be3bc8fead982fed.mockapi.io/api/v1/Incidents';
 
-  icidentsPage(page: number= 1, limit: number= 5): Observable <Incident[]>{
+  icidentsPage(page: number = 1, limit: number = 5): Observable<Incident[]> {
     const params = new HttpParams().set('page', page.toString()).set('limit', limit.toString());
-    return this.http.get<Incident[]>(this.apiUrl, {params});
+    return this.http.get<Incident[]>(this.apiUrl, { params });
   }
 
-  icidentCreate(incident: Incident): Observable<Incident[]>{
-    return this.http.post<Incident[]>(this.apiUrl, incident);
+  icidentCreate(incidencia: Incident): Observable<Incident> {
+    return this.http.post<Incident>(this.apiUrl, incidencia);
   }
 
-  stateIcident(id: string, estado: string, observacion: string): Observable<Incident[]>{
-    return this.http.put<Incident[]>(`${this.apiUrl}/${id}`, {estado, observacion});
+  statusUpdate(id: string, estado: string, observacion: string): Observable<Incident> {
+    return this.http.put<Incident>(`${this.apiUrl}/${id}`, { estado, observacion });
   }
-
 }

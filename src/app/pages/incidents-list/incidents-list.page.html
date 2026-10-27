@@ -1,0 +1,49 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>UrbanInspect</ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/seguimiento">
+        <ion-icon name="bookmark" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-item *ngIf="isLoadingError" color="danger">
+    <ion-label>Error de conexión con la oficina.</ion-label>
+    <ion-button slot="end" fill="clear" (click)="cargarPaginaInicial()">Reintentar</ion-button>
+  </ion-item>
+
+  <div *ngIf="!isLoadingError && incidencias.length === 0" class="ion-padding ion-text-center">
+    <p>No se encontraron registros de incidencias.</p>
+  </div>
+
+  <ion-list *ngIf="incidencias.length > 0">
+    <ion-item *ngFor="let item of incidencias" [routerLink]="['/detalle', item.id]" detail>
+      <ion-thumbnail slot="start" *ngIf="item.foto">
+        <img [src]="item.foto" alt="Foto" />
+      </ion-thumbnail>
+      <ion-label>
+        <h2>{{ item.tipo | uppercase }} - {{ item.sector }}</h2>
+        <p>{{ item.descripcion }}</p>
+      </ion-label>
+      <ion-badge slot="end" [color]="item.estado === 'resuelta' ? 'success' : 'warning'">
+        {{ item.estado }}
+      </ion-badge>
+      <ion-button slot="end" fill="clear" (click)="toggleSeguimiento(item.id!, $event)">
+        <ion-icon [name]="esSeguimiento(item.id!) ? 'bookmark' : 'bookmark-outline'"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <ion-infinite-scroll (ionInfinite)="cargarMasPaginas($event)" [disabled]="!hasMoreData">
+    <ion-infinite-scroll-content loadingText="Cargando más registros..."></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button routerLink="/registro">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>
