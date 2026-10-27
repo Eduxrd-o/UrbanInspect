@@ -12,15 +12,15 @@
 <ion-content>
   <ion-item *ngIf="isLoadingError" color="danger">
     <ion-label>Error de conexión con la oficina.</ion-label>
-    <ion-button slot="end" fill="clear" (click)="cargarPaginaInicial()">Reintentar</ion-button>
+    <ion-button slot="end" fill="clear" (click)="paginaInicial()">Reintentar</ion-button>
   </ion-item>
 
-  <div *ngIf="!isLoadingError && incidencias.length === 0" class="ion-padding ion-text-center">
+  <div *ngIf="!isLoadingError && incidents.length === 0" class="ion-padding ion-text-center">
     <p>No se encontraron registros de incidencias.</p>
   </div>
 
-  <ion-list *ngIf="incidencias.length > 0">
-    <ion-item *ngFor="let item of incidencias" [routerLink]="['/detalle', item.id]" detail>
+  <ion-list *ngIf="incidents.length > 0">
+    <ion-item *ngFor="let item of incidents" [routerLink]="['/detalle', item.id]" detail>
       <ion-thumbnail slot="start" *ngIf="item.foto">
         <img [src]="item.foto" alt="Foto" />
       </ion-thumbnail>

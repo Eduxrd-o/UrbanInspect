@@ -8,8 +8,9 @@ Aplicación móvil desarrollada con Ionic + Angular Standalone + Capacitor para 
 - **Backend Simulado:** MockAPI (R2, R3, R5, R9) - Paginación nativa mediante parámetros HTTP `page` y `limit`.
 - **Persistencia Local:** `@capacitor/preferences` (R1, R8) - Manejo nativo de borradores y seguimiento local en Android.
 
-## Ejecución
+## Ejecuta la compilación e integración final con Android:
 ```bash
 npm install
 ionic build
 npx cap sync android
+

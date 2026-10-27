@@ -4,14 +4,52 @@ import { RouterModule } from '@angular/router';
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { IncidentService, Incident } from '../../services/incidents';
 import { StorageService } from '../../services/storage';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
+import {
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButtons,
+  IonButton,
+  IonIcon,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonThumbnail,
+  IonBadge,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
+  IonFab,
+  IonFabButton
+} from '@ionic/angular';
+import { bookmark, bookmarkOutline, add } from 'ionicons/icons';
+import { addIcons } from 'ionicons';
 
 @Component({
   selector: 'app-incidents-list',
   standalone: true,
   templateUrl: './incidents-list.page.html',
   styleUrls: ['./incidents-list.page.scss'],
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, RouterModule]
+  imports: [
+    CommonModule,
+    RouterModule,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonButtons,
+    IonButton,
+    IonIcon,
+    IonItem,
+    IonLabel,
+    IonList,
+    IonThumbnail,
+    IonBadge,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
+    IonFab,
+    IonFabButton
+  ]
 })
 export class IncidentsListPage implements OnInit {
 
@@ -26,12 +64,16 @@ export class IncidentsListPage implements OnInit {
   hasMoreData = true;
   isLoadingError = false;
 
-  async ngOnInit() {
-    this.seguimientosIds = await this.storageService.seguimientoIds();
-    this.HomePage();
+  constructor() {
+    addIcons({ bookmark, bookmarkOutline, add });
   }
 
-  HomePage() {
+  async ngOnInit() {
+    this.seguimientosIds = await this.storageService.seguimientoIds();
+    this.paginaInicial();
+  }
+
+  paginaInicial() {
     this.currentPage = 1;
     this.hasMoreData = true;
     this.isLoadingError = false;
