@@ -262,12 +262,6 @@
       <span>Seguimiento</span>
       <span class="tab-badge" *ngIf="seguimientosIds.length > 0">{{ seguimientosIds.length }}</span>
     </div>
-
-    <div class="field-mode-indicator">
-      <span class="mode-dot"></span>
-      <span>Modo campo activo</span>
-    </div>
-  </div>
 </ion-footer>
 
 <ion-modal [isOpen]="mostrarModalRegistroRapido" (didDismiss)="cerrarModalRegistroRapido()" class="quick-reg-modal">

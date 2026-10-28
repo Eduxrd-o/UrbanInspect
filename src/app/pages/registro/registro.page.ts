@@ -108,7 +108,7 @@ export class RegistroPage implements OnInit {
       const borrador = await this.storageService.borrador();
       if (borrador && Object.values(borrador).some(v => v !== '' && v !== null && v !== 'media')) {
         const alert = await this.alertCtrl.create({
-          header: 'Registro Incompleto (R8)',
+          header: 'Registro Incompleto',
           message: 'Se encontró un borrador previo no guardado. ¿Deseas recuperar los datos ingresados?',
           buttons: [
             {
@@ -276,7 +276,7 @@ export class RegistroPage implements OnInit {
     }
 
     if (val.tipo === 'bache' && (!val.latitud || !val.longitud)) {
-      await this.mostrarToast('R7: La ubicación GPS o manual es obligatoria para baches.', 'danger');
+      await this.mostrarToast('La ubicación GPS o manual es obligatoria para baches.', 'danger');
       await this.solicitarCoordenadasManuales();
       return;
     }
