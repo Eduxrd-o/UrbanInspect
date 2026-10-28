@@ -44,6 +44,7 @@ import {
   locate,
   chevronForward,
   home,
+  calendarOutline,
 } from 'ionicons/icons';
 import { IncidentService, Incident } from '../services/incidents';
 import { WeatherService, WeatherData } from '../services/weather';
@@ -137,6 +138,7 @@ export class HomePage implements OnInit {
       heartOutline,
       timeOutline,
       flashlightOutline,
+      calendarOutline
     });
   }
 

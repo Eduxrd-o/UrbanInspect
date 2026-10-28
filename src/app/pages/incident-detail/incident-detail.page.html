@@ -79,7 +79,7 @@
           <ion-item *ngIf="incident.latitud && incident.longitud">
             <ion-icon name="navigate-outline" slot="start" color="primary"></ion-icon>
             <ion-label>
-              <h3>Coordenadas GPS (R7)</h3>
+              <h3>Coordenadas GPS</h3>
               <p>{{ incident.latitud | number:'1.5-5' }}, {{ incident.longitud | number:'1.5-5' }}</p>
             </ion-label>
           </ion-item>
@@ -106,7 +106,7 @@
     <ion-card class="info-card resolved-card" *ngIf="incident.observacion">
       <ion-card-header>
         <ion-card-subtitle color="success">
-          <ion-icon name="checkmark-done"></ion-icon> Observación de Resolución (R9)
+          <ion-icon name="checkmark-done"></ion-icon> Observación de Resolución
         </ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
@@ -115,7 +115,7 @@
     </ion-card>
 
     <div class="actions-section">
-      <h2 class="actions-title">Gestión de Estado (R9)</h2>
+      <h2 class="actions-title">Gestión de Estado </h2>
 
       <div *ngIf="incident.estado === 'pendiente'" class="action-buttons-group">
         <ion-button expand="block" color="warning" class="action-btn" (click)="pasarAEnProceso()">

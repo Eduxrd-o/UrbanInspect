@@ -1,7 +1,7 @@
-
 .main-navbar {
   background: #ffffff;
   border-bottom: 1px solid #eef2f0;
+  padding-top: var(--ion-safe-area-top, env(safe-area-inset-top, 0));
 
   .top-nav-container {
     display: flex;
@@ -164,6 +164,24 @@
   gap: 14px;
 
   .welcome-texts {
+    .mobile-date-badge {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #0284c7;
+      background: #e0f2fe;
+      padding: 4px 10px;
+      border-radius: 8px;
+      width: fit-content;
+      margin-bottom: 6px;
+
+      ion-icon {
+        font-size: 0.95rem;
+      }
+    }
+
     .welcome-sub {
       font-size: 0.85rem;
       color: #64748b;
@@ -609,20 +627,22 @@
       justify-content: space-between;
       align-items: flex-end;
       height: 90px;
-      padding: 0 6px 10px 6px;
+      width: 100%;
+      padding: 0 4px 10px 4px;
       border-bottom: 1px solid #f1f5f9;
 
       .bar-col {
+        flex: 1;
+        max-width: 32px;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 6px;
-        width: 18px;
         height: 100%;
         justify-content: flex-end;
 
         .bar-fill {
-          width: 14px;
+          width: 12px;
           background: #a7f3d0;
           border-radius: 4px;
           min-height: 8px;
@@ -847,6 +867,112 @@ ion-modal.quick-reg-modal {
           color: #94a3b8;
         }
       }
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .main-navbar .top-nav-container {
+    padding: 8px 14px;
+    gap: 8px;
+
+    .brand-area {
+      .brand-logo {
+        width: 32px;
+        height: 32px;
+      }
+      .brand-text .brand-name {
+        font-size: 0.95rem;
+      }
+    }
+
+    .nav-right-area {
+      gap: 10px;
+
+      .nav-date-group {
+        display: none;
+      }
+    }
+  }
+
+  .welcome-header-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    .welcome-texts {
+      .mobile-date-badge {
+        display: inline-flex;
+      }
+
+      .welcome-title {
+        font-size: 1.45rem;
+      }
+    }
+
+    .welcome-action .btn-new-incident {
+      width: 100%;
+      height: 46px;
+    }
+  }
+
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+
+    .kpi-card {
+      padding: 12px 12px;
+      border-radius: 14px;
+
+      .kpi-header {
+        margin-bottom: 8px;
+
+        .kpi-label {
+          font-size: 0.72rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .kpi-icon-wrap {
+          width: 28px;
+          height: 28px;
+          min-width: 28px;
+          font-size: 0.95rem;
+        }
+      }
+
+      .kpi-value {
+        font-size: 1.45rem;
+        margin-bottom: 4px;
+      }
+
+      .kpi-footer {
+        font-size: 0.65rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  .bottom-navbar .bottom-nav-row {
+    padding: 6px 6px;
+
+    .nav-tab-item {
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      gap: 4px;
+
+      ion-icon {
+        font-size: 1.1rem;
+      }
+    }
+
+    .field-mode-indicator {
+      display: none;
     }
   }
 }

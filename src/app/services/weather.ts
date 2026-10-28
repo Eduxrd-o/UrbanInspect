@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, timeout } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 export interface WeatherData {
@@ -32,6 +32,7 @@ export class WeatherService {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,precipitation,weather_code&hourly=precipitation&forecast_days=1`;
 
     return this.http.get<any>(url).pipe(
+      timeout(6000),
       map((res) => {
         const hourPrecipitation = res.hourly?.precipitation?.[0] ?? res.current?.precipitation ?? 0;
         const code = res.current?.weather_code ?? 0;
@@ -48,7 +49,7 @@ export class WeatherService {
           temp: 0,
           precipitationLastHour: 0,
           hasWarning: false,
-          condition: 'No disponible',
+          condition: 'Servicio no disponible',
           error: true
         })
       )

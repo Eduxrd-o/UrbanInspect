@@ -39,6 +39,10 @@
 
     <div class="welcome-header-row">
       <div class="welcome-texts">
+        <div class="mobile-date-badge">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <span>{{ fechaHoy | date:"EEEE, d 'de' MMMM" | titlecase }}</span>
+        </div>
         <h1 class="welcome-title">Todo bajo control.</h1>
         <p class="welcome-desc">Revisa las novedades de tu zona de inspección.</p>
       </div>

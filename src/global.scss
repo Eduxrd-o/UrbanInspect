@@ -1,5 +1,3 @@
-
-
 @import "@ionic/angular/css/core.css";
 
 @import "@ionic/angular/css/normalize.css";
@@ -21,4 +19,8 @@ body {
 
 ion-content {
   --background: #f8fafc;
+}
+
+ion-header {
+  padding-top: var(--ion-safe-area-top, env(safe-area-inset-top, 0));
 }

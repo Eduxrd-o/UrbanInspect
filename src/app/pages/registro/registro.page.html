@@ -122,12 +122,12 @@
 
           <div *ngIf="climaData.error" class="weather-warning" style="background: rgba(245, 158, 11, 0.12); border-color: #f59e0b; color: #b45309;">
             <ion-icon name="warning" color="warning"></ion-icon>
-            <span><strong>Aviso (R4):</strong> El servicio meteorológico externo no respondió. Puedes continuar con el registro normalmente.</span>
+            <span><strong>Aviso:</strong> El servicio meteorológico externo no respondió. Puedes continuar con el registro normalmente.</span>
           </div>
 
           <div *ngIf="climaData.hasWarning && !climaData.error" class="weather-warning">
             <ion-icon name="warning" color="danger"></ion-icon>
-            <span><strong>Advertencia (R4):</strong> La precipitación supera 5mm/h. Las condiciones climáticas podrían dificultar el mantenimiento.</span>
+            <span><strong>Advertencia:</strong> La precipitación supera 5mm/h. Las condiciones climáticas podrían dificultar el mantenimiento.</span>
           </div>
         </div>
       </ion-card-content>

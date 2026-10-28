@@ -146,12 +146,17 @@ export class RegistroPage implements OnInit {
   async capturarFoto() {
     try {
       const image = await Camera.getPhoto({
-        quality: 60,
+        quality: 45,
+        width: 600,
+        height: 600,
+        correctOrientation: true,
         resultType: CameraResultType.Base64,
         source: CameraSource.Camera
       });
       if (image?.base64String) {
-        this.form.patchValue({ foto: `data:image/jpeg;base64,${image.base64String}` });
+        const raw = `data:image/jpeg;base64,${image.base64String}`;
+        const compressed = await this.comprimirImagen(raw, 600, 0.45);
+        this.form.patchValue({ foto: compressed });
       }
     } catch (e) {
       this.abrirSelectorArchivo();
@@ -166,13 +171,41 @@ export class RegistroPage implements OnInit {
       const file = e.target?.files?.[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = () => {
-          this.form.patchValue({ foto: reader.result as string });
+        reader.onload = async () => {
+          const raw = reader.result as string;
+          const compressed = await this.comprimirImagen(raw, 600, 0.45);
+          this.form.patchValue({ foto: compressed });
         };
         reader.readAsDataURL(file);
       }
     };
     input.click();
+  }
+
+  private comprimirImagen(dataUrl: string, maxWidth = 600, quality = 0.45): Promise<string> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        } else {
+          resolve(dataUrl);
+        }
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
   }
 
   limpiarFoto() {
@@ -249,8 +282,13 @@ export class RegistroPage implements OnInit {
     }
 
     this.isSaving = true;
+    let fotoFinal = val.foto;
+    if (fotoFinal && typeof fotoFinal === 'string' && fotoFinal.startsWith('data:image')) {
+      fotoFinal = await this.comprimirImagen(fotoFinal, 600, 0.45);
+    }
     const payload = {
       ...val,
+      foto: fotoFinal,
       fecha: new Date().toISOString(),
       estado: 'pendiente'
     };
