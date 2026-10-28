@@ -1,21 +1,68 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
+import {
+  IonContent,
+  IonHeader,
+  IonTitle,
+  IonToolbar,
+  IonButtons,
+  IonBackButton,
+  IonItem,
+  IonLabel,
+  IonSelect,
+  IonSelectOption,
+  IonTextarea,
+  IonInput,
+  IonButton,
+  IonIcon,
+  IonNote,
+  IonCard,
+  IonCardHeader,
+  IonCardSubtitle,
+  IonCardContent,
+  IonSpinner,
+  AlertController
+} from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { camera, trash, location, cloudyNight, warning, save, locate, chevronForward, add } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Geolocation } from '@capacitor/geolocation';
-import { AlertController} from '@ionic/angular';
 import { StorageService } from '../../services/storage';
 import { WeatherData, WeatherService } from '../../services/weather';
 import { IncidentService } from '../../services/incidents';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-registro',
   standalone: true,
   templateUrl: './registro.page.html',
   styleUrls: ['./registro.page.scss'],
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    IonContent,
+    IonHeader,
+    IonTitle,
+    IonToolbar,
+    IonButtons,
+    IonBackButton,
+    IonItem,
+    IonLabel,
+    IonSelect,
+    IonSelectOption,
+    IonTextarea,
+    IonInput,
+    IonButton,
+    IonIcon,
+    IonNote,
+    IonCard,
+    IonCardHeader,
+    IonCardSubtitle,
+    IonCardContent,
+    IonSpinner
+  ]
 })
 export class RegistroPage implements OnInit {
 
@@ -25,6 +72,7 @@ export class RegistroPage implements OnInit {
   private storageService = inject(StorageService);
   private alertCtrl = inject(AlertController);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   climaData: WeatherData | null = null;
 
@@ -39,37 +87,96 @@ export class RegistroPage implements OnInit {
     longitud: [null]
   });
 
-  async ngOnInit() {
-    const borrador = await this.storageService.borrador();
-    if(borrador){
-      const alert = await this.alertCtrl.create({
-        header: 'Registro Borrador',
-        message: '¿Deseas recuperar la información del registro inconcluso?',
-        buttons: [
-          { text: 'Descartar', role: 'cancel', handler: () => this.storageService.clearBorrador() },
-          { text: 'Continuar', handler: () => this.form.patchValue(borrador) }
-        ]
-      });
-      await alert.present();
-    }
+  private borradorChecked = false;
 
+  ngOnInit() {
     this.form.valueChanges.subscribe(val => {
       if (this.form.dirty) this.storageService.saveBorrador(val);
     });
+
+    this.route.queryParams.subscribe(async (params) => {
+      if (params['ubicacion'] === 'gps') {
+        await this.obtenerUbicacion();
+      } else if (params['ubicacion'] === 'manual') {
+        this.solicitarCoordenadasManuales();
+      }
+    });
   }
 
-  async guardarFoto(){
-    try{
+  async ionViewWillEnter() {
+    if (!this.borradorChecked) {
+      const borrador = await this.storageService.borrador();
+      if (borrador && Object.values(borrador).some(v => v !== '' && v !== null && v !== 'media')) {
+        const alert = await this.alertCtrl.create({
+          header: 'Registro Incompleto (R8)',
+          message: 'Se encontró un borrador previo no guardado. ¿Deseas recuperar los datos ingresados?',
+          buttons: [
+            {
+              text: 'Descartar',
+              role: 'cancel',
+              handler: async () => {
+                await this.storageService.clearBorrador();
+                this.form.reset({ prioridad: 'media' });
+              }
+            },
+            {
+              text: 'Continuar',
+              handler: () => {
+                this.form.patchValue(borrador);
+                if (borrador.latitud && borrador.longitud) {
+                  this.consultarClima(borrador.latitud, borrador.longitud);
+                }
+              }
+            }
+          ]
+        });
+        await alert.present();
+      }
+      this.borradorChecked = true;
+    }
+  }
+
+  ionViewWillLeave() {
+    this.borradorChecked = false;
+  }
+
+  constructor() {
+    addIcons({ camera, trash, location, 'cloudy-night': cloudyNight, cloudyNight, warning, save, locate, 'chevron-forward': chevronForward, chevronForward, add });
+  }
+  async capturarFoto() {
+    try {
       const image = await Camera.getPhoto({
-        quality: 80,
+        quality: 60,
         resultType: CameraResultType.Base64,
         source: CameraSource.Camera
-    });
-    if (image.base64String) {
-      this.form.patchValue({ foto: `data:image/jpeg;base64,${image.base64String}`});      
+      });
+      if (image?.base64String) {
+        this.form.patchValue({ foto: `data:image/jpeg;base64,${image.base64String}` });
       }
-    } catch (e){
-   }
+    } catch (e) {
+      this.abrirSelectorArchivo();
+    }
+  }
+
+  abrirSelectorArchivo() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e: any) => {
+      const file = e.target?.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.form.patchValue({ foto: reader.result as string });
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  }
+
+  limpiarFoto() {
+    this.form.patchValue({ foto: '' });
   }
 
   async obtenerUbicacion() {
@@ -78,9 +185,7 @@ export class RegistroPage implements OnInit {
       this.form.patchValue({ latitud: pos.coords.latitude, longitud: pos.coords.longitude });
       this.consultarClima(pos.coords.latitude, pos.coords.longitude);
     } catch (e) {
-      if (this.form.get('tipo')?.value === 'bache') {
-        this.solicitarCoordenadasManuales();
-      }
+      this.solicitarCoordenadasManuales();
     }
   }
 
@@ -91,7 +196,7 @@ export class RegistroPage implements OnInit {
   async solicitarCoordenadasManuales() {
     const alert = await this.alertCtrl.create({
       header: 'Coordenadas Requeridas',
-      message: 'Ingrese latitud y longitud para la incidencia de tipo bache:',
+      message: 'Ingrese latitud y longitud:',
       inputs: [
         { name: 'lat', type: 'number', placeholder: 'Latitud (-0.21)' },
         { name: 'lng', type: 'number', placeholder: 'Longitud (-78.50)' }
@@ -111,23 +216,67 @@ export class RegistroPage implements OnInit {
     await alert.present();
   }
 
+  isSaving = false;
+
   async guardar() {
-    if (this.form.invalid) return;
+    if (this.isSaving) return;
+
+    if (this.form.invalid) {
+      const faltantes: string[] = [];
+      if (!this.form.get('tipo')?.value) faltantes.push('Tipo de Incidencia');
+      if (!this.form.get('sector')?.value) faltantes.push('Sector o Parroquia');
+      if (!this.form.get('descripcion')?.value) faltantes.push('Descripción del Problema');
+
+      const mensaje = faltantes.length > 0
+        ? `Por favor completa los siguientes campos: ${faltantes.join(', ')}.`
+        : 'Por favor completa todos los campos requeridos (*).';
+
+      await this.mostrarToast(mensaje, 'warning');
+      return;
+    }
+
     const val = this.form.value;
 
     if (val.prioridad === 'alta' && !val.foto) {
-      alert('Foto obligatoria para prioridad alta.');
-      return;
-    }
-    if (val.tipo === 'bache' && !val.latitud) {
-      alert('Ubicación requerida para baches.');
+      await this.mostrarToast('R5: La fotografía es obligatoria para incidencias de prioridad alta.', 'danger');
       return;
     }
 
-    const payload = { ...val, fecha: new Date().toISOString(), estado: 'pendiente' };
-    this.IncidentService.icidentCreate(payload).subscribe(async () => {
-      await this.storageService.clearBorrador();
-      this.router.navigate(['/listado']);
+    if (val.tipo === 'bache' && (!val.latitud || !val.longitud)) {
+      await this.mostrarToast('R7: La ubicación GPS o manual es obligatoria para baches.', 'danger');
+      await this.solicitarCoordenadasManuales();
+      return;
+    }
+
+    this.isSaving = true;
+    const payload = {
+      ...val,
+      fecha: new Date().toISOString(),
+      estado: 'pendiente'
+    };
+
+    this.IncidentService.incidentCreate(payload).subscribe({
+      next: async () => {
+        await this.storageService.clearBorrador();
+        this.isSaving = false;
+        await this.mostrarToast('Incidencia registrada con éxito en el sistema.', 'success');
+        this.router.navigate(['/incidents-list']);
+      },
+      error: async (err) => {
+        console.error('Error al guardar incidencia:', err);
+        this.isSaving = false;
+        await this.mostrarToast('Error al conectar con la oficina. Revisa tu conexión a internet.', 'danger');
+      }
     });
+  }
+
+  private async mostrarToast(mensaje: string, color: string = 'success') {
+    const toast = await this.alertCtrl.create({
+      header: color === 'danger' ? 'Atención Requerida' : (color === 'warning' ? 'Campo Incompleto' : 'Confirmación'),
+      message: mensaje,
+      buttons: ['Aceptar']
+    });
+    await toast.present();
+    await toast.onDidDismiss();
   }
 }

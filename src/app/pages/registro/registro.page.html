@@ -1,13 +1,145 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>registro</ion-title>
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <img src="assets/escudo.png" alt="DMQ" style="height: 22px; width: 22px; vertical-align: -4px; margin-right: 6px;" />
+      Nueva Inspección
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">registro</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+
+    <ion-card class="form-card">
+      <ion-card-header>
+        <ion-card-subtitle>1. Datos del Hallazgo</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content class="ion-no-padding">
+        <ion-item lines="inset">
+          <ion-label position="stacked">Tipo de Incidencia *</ion-label>
+          <ion-select formControlName="tipo" placeholder="Seleccione el tipo">
+            <ion-select-option value="bache">Bache (Ubicación obligatoria)</ion-select-option>
+            <ion-select-option value="luminaria">Luminaria dañada</ion-select-option>
+            <ion-select-option value="señalizacion">Señalización deteriorada</ion-select-option>
+            <ion-select-option value="alcantarilla">Alcantarilla obstruida</ion-select-option>
+            <ion-select-option value="parque">Daño en parque</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item lines="inset">
+          <ion-label position="stacked">Nivel de Prioridad *</ion-label>
+          <ion-select formControlName="prioridad">
+            <ion-select-option value="baja">Baja</ion-select-option>
+            <ion-select-option value="media">Media</ion-select-option>
+            <ion-select-option value="alta">Alta (Exige Fotografía)</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item lines="inset">
+          <ion-label position="stacked">Sector o Parroquia *</ion-label>
+          <ion-input formControlName="sector" placeholder="Ej. La Carolina, Centro Histórico, Calderón"></ion-input>
+        </ion-item>
+
+        <ion-item lines="inset">
+          <ion-label position="stacked">Dirección Escrita</ion-label>
+          <ion-input formControlName="direccion" placeholder="Calle principal y secundaria"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none">
+          <ion-label position="stacked">Descripción del Problema *</ion-label>
+          <ion-textarea formControlName="descripcion" placeholder="Detalle el estado del hallazgo observado en campo..." rows="3"></ion-textarea>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="form-card">
+      <ion-card-header>
+        <ion-card-subtitle>2. Evidencia Fotográfica </ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button expand="block" fill="outline" color="primary" (click)="capturarFoto()">
+          <ion-icon name="camera" slot="start"></ion-icon>
+          {{ form.value.foto ? 'Tomar otra fotografía' : 'Capturar Fotografía con Cámara' }}
+        </ion-button>
+
+        <div *ngIf="form.value.foto" class="photo-preview-box">
+          <img [src]="form.value.foto" alt="Previsualización" />
+          <ion-button color="danger" fill="clear" size="small" (click)="limpiarFoto()">
+            <ion-icon name="trash" slot="start"></ion-icon>
+            Eliminar Fotografía
+          </ion-button>
+        </div>
+
+        <ion-note color="medium" class="photo-hint" *ngIf="form.value.prioridad === 'alta' && !form.value.foto">
+          * Para prioridad alta, la fotografía es obligatoria antes de enviar.
+        </ion-note>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="form-card">
+      <ion-card-header>
+        <ion-card-subtitle>3. Ubicación y Clima en Sitio </ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="location-choice-group">
+          <div class="location-choice-card" (click)="obtenerUbicacion()">
+            <div class="choice-avatar choice-gps">
+              <ion-icon name="locate"></ion-icon>
+            </div>
+            <div class="choice-text">
+              <span class="choice-title">Usar mi ubicación</span>
+              <span class="choice-sub">Captura coordenadas para el reporte</span>
+            </div>
+            <ion-icon name="chevron-forward" class="choice-arrow"></ion-icon>
+          </div>
+
+          <div class="location-choice-card" (click)="solicitarCoordenadasManuales()">
+            <div class="choice-avatar choice-manual">
+              <ion-icon name="add"></ion-icon>
+            </div>
+            <div class="choice-text">
+              <span class="choice-title">Ingresar manualmente</span>
+              <span class="choice-sub">Continúa sin ubicación automática</span>
+            </div>
+            <ion-icon name="chevron-forward" class="choice-arrow"></ion-icon>
+          </div>
+        </div>
+
+        <div *ngIf="form.value.latitud" class="coords-box">
+          <ion-icon name="location" color="success"></ion-icon>
+          <span>Coordenadas fijadas: {{ form.value.latitud | number:'1.5-5' }}, {{ form.value.longitud | number:'1.5-5' }}</span>
+        </div>
+
+        <div *ngIf="climaData" class="weather-result-box">
+          <div *ngIf="!climaData.error" class="weather-row">
+            <ion-icon name="cloudy-night" color="primary"></ion-icon>
+            <strong>Clima en Sitio:</strong>
+            <span>{{ climaData.condition }} · {{ climaData.temp }}°C · Lluvia (1h): {{ climaData.precipitationLastHour }} mm</span>
+          </div>
+
+          <div *ngIf="climaData.error" class="weather-warning" style="background: rgba(245, 158, 11, 0.12); border-color: #f59e0b; color: #b45309;">
+            <ion-icon name="warning" color="warning"></ion-icon>
+            <span><strong>Aviso (R4):</strong> El servicio meteorológico externo no respondió. Puedes continuar con el registro normalmente.</span>
+          </div>
+
+          <div *ngIf="climaData.hasWarning && !climaData.error" class="weather-warning">
+            <ion-icon name="warning" color="danger"></ion-icon>
+            <span><strong>Advertencia (R4):</strong> La precipitación supera 5mm/h. Las condiciones climáticas podrían dificultar el mantenimiento.</span>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="submit-box">
+      <ion-button expand="block" type="button" (click)="guardar()" color="primary" [disabled]="isSaving" class="submit-btn">
+        <ion-spinner *ngIf="isSaving" name="crescent" slot="start"></ion-spinner>
+        <ion-icon *ngIf="!isSaving" name="save" slot="start"></ion-icon>
+        {{ isSaving ? 'Guardando en la oficina...' : 'Guardar Incidencia' }}
+      </ion-button>
+    </div>
+
+  </form>
 </ion-content>

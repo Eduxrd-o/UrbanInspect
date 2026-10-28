@@ -1,48 +1,139 @@
-<ion-header>
+<ion-header class="ion-no-border list-navbar">
   <ion-toolbar color="primary">
-    <ion-title>UrbanInspect</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <img src="assets/logo-dmq.svg" alt="DMQ" style="height: 20px; width: 20px; vertical-align: -3px; margin-right: 6px; filter: brightness(0) invert(1);" />
+      Incidencias de Campo
+    </ion-title>
     <ion-buttons slot="end">
-      <ion-button routerLink="/seguimiento">
-        <ion-icon name="bookmark" slot="icon-only"></ion-icon>
+      <ion-button (click)="paginaInicial()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
+
+  <ion-toolbar color="primary" class="search-toolbar">
+    <ion-searchbar
+      [(ngModel)]="terminoBusqueda"
+      placeholder="Buscar por tipo, sector, calle..."
+      debounce="300"
+      show-clear-button="always"
+      class="custom-searchbar">
+    </ion-searchbar>
+  </ion-toolbar>
+
+  
+  <ion-toolbar class="filter-toolbar">
+    <ion-segment [(ngModel)]="filtroEstado" [scrollable]="true" mode="md">
+      <ion-segment-button value="todas">
+        <ion-label>Todas</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="pendiente">
+        <ion-label>Pendientes</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="en proceso">
+        <ion-label>En Proceso</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="resuelta">
+        <ion-label>Resueltas</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="seguimiento">
+        <ion-icon name="bookmark"></ion-icon>
+        <ion-label>Seguimiento ({{ seguimientosIds.length }})</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-item *ngIf="isLoadingError" color="danger">
-    <ion-label>Error de conexión con la oficina.</ion-label>
-    <ion-button slot="end" fill="clear" (click)="paginaInicial()">Reintentar</ion-button>
-  </ion-item>
+<ion-content class="ion-padding content-canvas">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content pullingText="Desliza para actualizar..." refreshingSpinner="crescent"></ion-refresher-content>
+  </ion-refresher>
 
-  <div *ngIf="!isLoadingError && incidents.length === 0" class="ion-padding ion-text-center">
-    <p>No se encontraron registros de incidencias.</p>
+  
+  <div *ngIf="isLoading" class="ion-text-center ion-padding loading-container">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Consultando incidencias con la oficina...</p>
   </div>
 
-  <ion-list *ngIf="incidents.length > 0">
-    <ion-item *ngFor="let item of incidents" [routerLink]="['/detalle', item.id]" detail>
-      <ion-thumbnail slot="start" *ngIf="item.foto">
-        <img [src]="item.foto" alt="Foto" />
-      </ion-thumbnail>
-      <ion-label>
-        <h2>{{ item.tipo | uppercase }} - {{ item.sector }}</h2>
-        <p>{{ item.descripcion }}</p>
-      </ion-label>
-      <ion-badge slot="end" [color]="item.estado === 'resuelta' ? 'success' : 'warning'">
-        {{ item.estado }}
-      </ion-badge>
-      <ion-button slot="end" fill="clear" (click)="toggleSeguimiento(item.id!, $event)">
-        <ion-icon [name]="esSeguimiento(item.id!) ? 'bookmark' : 'bookmark-outline'"></ion-icon>
-      </ion-button>
-    </ion-item>
-  </ion-list>
+  
+  <div *ngIf="isLoadingError && !isLoading" class="ion-padding ion-text-center error-container">
+    <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+    <h3>Error al conectar con la oficina</h3>
+    <p>No se pudo consultar el servicio remoto simulado.</p>
+    <ion-button fill="outline" color="primary" (click)="paginaInicial()">
+      <ion-icon name="refresh-outline" slot="start"></ion-icon>
+      Reintentar Consulta
+    </ion-button>
+  </div>
 
-  <ion-infinite-scroll (ionInfinite)="cargarMasPaginas($event)" [disabled]="!hasMoreData">
-    <ion-infinite-scroll-content loadingText="Cargando más registros..."></ion-infinite-scroll-content>
+  
+  <div *ngIf="!isLoading && !isLoadingError && incidenciasFiltradas.length === 0" class="ion-padding ion-text-center empty-container">
+    <ion-icon name="search-outline" color="medium"></ion-icon>
+    <h3>No hay incidencias para mostrar</h3>
+    <p *ngIf="filtroEstado === 'seguimiento'">No has marcado ninguna incidencia para seguimiento local.</p>
+    <p *ngIf="filtroEstado !== 'seguimiento'">No se encontraron registros que coincidan con el filtro actual.</p>
+  </div>
+
+  
+  <div class="mockup-cards-list" *ngIf="!isLoading && incidenciasFiltradas.length > 0">
+    <div
+      *ngFor="let item of incidenciasFiltradas"
+      class="mockup-incident-card"
+      [routerLink]="['/incident-detail', item.id]">
+
+      
+      <div class="incident-type-avatar" [ngClass]="item.tipo.toLowerCase()">
+        <img *ngIf="item.foto" [src]="item.foto" alt="Evidencia" class="thumb-img" />
+        <ion-icon *ngIf="!item.foto" [name]="getIconoPorTipo(item.tipo)"></ion-icon>
+      </div>
+
+      <div class="incident-main-data">
+        <div class="pills-row">
+          <span class="id-tag">UI-{{ item.id }}</span>
+          <span class="status-pill" [ngClass]="item.estado.toLowerCase()">
+            {{ item.estado | titlecase }}
+          </span>
+        </div>
+
+        <h3 class="incident-name">{{ item.tipo | titlecase }}: {{ item.descripcion }}</h3>
+
+        <div class="incident-location">
+          <ion-icon name="location-outline"></ion-icon>
+          <span><strong>{{ item.sector }}</strong> · {{ item.direccion || 'Sin dirección' }}</span>
+        </div>
+      </div>
+
+      <div class="incident-right-meta">
+        <span class="meta-time">{{ item.fecha | date:'dd/MM HH:mm' }}</span>
+        <span class="meta-priority">Prioridad {{ item.prioridad | titlecase }}</span>
+
+        <button
+          class="heart-btn"
+          [class.active]="esSeguimiento(item.id!)"
+          (click)="toggleSeguimiento(item.id!, $event)">
+          <ion-icon [name]="esSeguimiento(item.id!) ? 'heart' : 'heart-outline'"></ion-icon>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  
+  <ion-infinite-scroll
+    (ionInfinite)="cargarMasPaginas($event)"
+    [disabled]="!hasMoreData || filtroEstado === 'seguimiento'">
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Cargando más incidencias desde la oficina...">
+    </ion-infinite-scroll-content>
   </ion-infinite-scroll>
 
+  
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button routerLink="/registro">
+    <ion-fab-button routerLink="/registro" color="primary">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>

@@ -1,20 +1,308 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
-  </ion-toolbar>
+<ion-header class="ion-no-border main-navbar">
+  <div class="top-nav-container">
+    <div class="brand-area">
+      <div class="brand-logo">
+        <img src="assets/logo-dmq.svg" alt="Logo DMQ" class="brand-img-logo" />
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">UrbanInspect</span>
+        <span class="brand-tag">QUITO· CAMPO</span>
+      </div>
+    </div>
+
+    <div class="nav-right-area">
+      <div class="nav-date-group">
+        <span class="date-label">{{ fechaHoy | date:'EEEE, d \'de\' MMMM' }}</span>
+        <h2 class="nav-panel-title">Panel de inspección</h2>
+      </div>
+
+      <div class="nav-user-actions">
+        <button class="icon-circle-btn" (click)="cargarDatos()">
+          <ion-icon name="refresh-outline"></ion-icon>
+        </button>
+        <div class="user-profile-badge">
+          <div class="user-avatar">
+            <img src="assets/escudo.png" alt="Escudo Quito" class="avatar-img-escudo" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding content-canvas">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content pullingText="Desliza para actualizar..." refreshingSpinner="crescent"></ion-refresher-content>
+  </ion-refresher>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+  <div class="dashboard-wrapper">
+
+    <div class="welcome-header-row">
+      <div class="welcome-texts">
+        <h1 class="welcome-title">Todo bajo control.</h1>
+        <p class="welcome-desc">Revisa las novedades de tu zona de inspección.</p>
+      </div>
+
+      <div class="welcome-action">
+        <ion-button (click)="abrirModalRegistroRapido()" class="btn-new-incident" color="primary">
+          <ion-icon name="add" slot="start"></ion-icon>
+          Nueva incidencia
+        </ion-button>
+      </div>
+    </div>
+
+    
+    <div class="kpi-grid">
+      
+      <div class="kpi-card kpi-dark-card" routerLink="/incidents-list">
+        <div class="kpi-header">
+          <span class="kpi-label">PANORAMA URBANO</span>
+          <div class="kpi-icon-wrap icon-cyan">
+            <ion-icon name="speedometer-outline"></ion-icon>
+          </div>
+        </div>
+        <div class="kpi-value">{{ totalCount }}</div>
+        <div class="kpi-footer font-cyan">
+          <span class="dot-red"></span> +{{ totalCount }} este ciclo
+        </div>
+      </div>
+
+      
+      <div class="kpi-card" [routerLink]="['/incidents-list']" [queryParams]="{ filtro: 'pendiente' }">
+        <div class="kpi-header">
+          <span class="kpi-label">Pendientes</span>
+          <div class="kpi-icon-wrap icon-amber">
+            <ion-icon name="warning-outline"></ion-icon>
+          </div>
+        </div>
+        <div class="kpi-value">{{ pendientesCount }}</div>
+        <div class="kpi-footer font-amber">{{ pendientesCount }} requieren atención</div>
+      </div>
+
+      
+      <div class="kpi-card" [routerLink]="['/incidents-list']" [queryParams]="{ filtro: 'en proceso' }">
+        <div class="kpi-header">
+          <span class="kpi-label">En proceso</span>
+          <div class="kpi-icon-wrap icon-blue">
+            <ion-icon name="build-outline"></ion-icon>
+          </div>
+        </div>
+        <div class="kpi-value">{{ enProcesoCount }}</div>
+        <div class="kpi-footer font-blue">{{ enProcesoCount }} en mantenimiento</div>
+      </div>
+
+      
+      <div class="kpi-card" [routerLink]="['/incidents-list']" [queryParams]="{ filtro: 'resuelta' }">
+        <div class="kpi-header">
+          <span class="kpi-label">Resueltas</span>
+          <div class="kpi-icon-wrap icon-purple">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+          </div>
+        </div>
+        <div class="kpi-value">{{ resueltasCount }}</div>
+        <div class="kpi-footer font-purple">
+          {{ totalCount > 0 ? ((resueltasCount / totalCount) * 100 | number:'1.0-0') : 0 }}% del total
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="main-columns-grid">
+      
+      
+      <div class="recent-activity-column">
+        <div class="section-top-bar">
+          <div>
+            <h2 class="section-title">Actividad reciente</h2>
+            <p class="section-subtitle">Incidencias registradas en tu zona</p>
+          </div>
+          <a routerLink="/incidents-list" class="view-all-link">
+            Ver todas <ion-icon name="arrow-forward"></ion-icon>
+          </a>
+        </div>
+
+        <div *ngIf="isLoading" class="loading-state">
+          <ion-spinner name="crescent" color="primary"></ion-spinner>
+          <span>Consultando con el servicio de oficina...</span>
+        </div>
+
+        <div *ngIf="!isLoading && recentIncidents.length === 0" class="empty-state">
+          <p>No hay actividad reciente para mostrar.</p>
+        </div>
+
+        
+        <div class="incident-items-list" *ngIf="!isLoading && recentIncidents.length > 0">
+          <div
+            *ngFor="let item of recentIncidents"
+            class="mockup-incident-card"
+            [routerLink]="['/incident-detail', item.id]">
+
+            
+            <div class="incident-type-avatar" [ngClass]="item.tipo.toLowerCase()">
+              <ion-icon [name]="getIconoPorTipo(item.tipo)"></ion-icon>
+            </div>
+
+            
+            <div class="incident-main-data">
+              <div class="pills-row">
+                <span class="id-tag">UI-{{ item.id }}</span>
+                <span class="status-pill" [ngClass]="item.estado.toLowerCase()">
+                  {{ item.estado | titlecase }}
+                </span>
+              </div>
+
+              <h3 class="incident-name">{{ item.tipo | titlecase }}: {{ item.descripcion }}</h3>
+              <div class="incident-location">
+                <ion-icon name="location-outline"></ion-icon>
+                <span>{{ item.direccion || item.sector }}</span>
+              </div>
+            </div>
+
+            
+            <div class="incident-right-meta">
+              <span class="meta-time">{{ item.fecha | date:'shortTime' }}</span>
+              <span class="meta-priority">Prioridad {{ item.prioridad | titlecase }}</span>
+
+              <button
+                class="heart-btn"
+                [class.active]="esSeguimiento(item.id!)"
+                (click)="toggleSeguimiento(item.id!, $event)">
+                <ion-icon [name]="esSeguimiento(item.id!) ? 'heart' : 'heart-outline'"></ion-icon>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="side-widgets-column">
+
+        
+        <div class="dark-weather-widget" *ngIf="climaQuito">
+          <div class="weather-top">
+            <span class="weather-header-tag">CLIMA EN QUITO</span>
+            <ion-icon name="cloudy-outline" class="weather-cloud-icon"></ion-icon>
+          </div>
+
+          <div class="weather-temp-display">
+            <span class="temp-number">{{ climaQuito.temp }}°</span>
+            <span class="temp-unit">C</span>
+          </div>
+
+          <div class="weather-condition-desc">
+            {{ climaQuito.hasWarning ? 'Lluvia intensa' : 'Condiciones normales' }}
+          </div>
+
+          <div class="weather-footer-metrics">
+            <div class="weather-stat-item">
+              <span class="stat-meta-label">Precipitación</span>
+              <span class="stat-meta-val">{{ climaQuito.precipitationLastHour }} mm</span>
+            </div>
+            <div class="weather-stat-item">
+              <span class="stat-meta-label">Última actualización</span>
+              <span class="stat-meta-val">{{ fechaHoy | date:'HH:mm' }}</span>
+            </div>
+          </div>
+
+          <div *ngIf="climaQuito.hasWarning" class="weather-alert-banner">
+            <ion-icon name="warning"></ion-icon>
+            <span>Alerta: Precipitación &gt; 5 mm/h</span>
+          </div>
+        </div>
+
+        
+        <div class="weekly-summary-card">
+          <div class="summary-top">
+            <span class="summary-title">Resumen de Inspecciones</span>
+            <span class="summary-stat-badge">{{ totalCount }}</span>
+          </div>
+
+          <div class="summary-bar-chart">
+            <div class="bar-col"><div class="bar-fill" style="height: 45%;"></div><span class="bar-day">L</span></div>
+            <div class="bar-col"><div class="bar-fill" style="height: 70%;"></div><span class="bar-day">M</span></div>
+            <div class="bar-col"><div class="bar-fill" style="height: 55%;"></div><span class="bar-day">X</span></div>
+            <div class="bar-col"><div class="bar-fill" style="height: 90%;"></div><span class="bar-day">J</span></div>
+            <div class="bar-col active"><div class="bar-fill active" style="height: 100%;"></div><span class="bar-day font-bold">V</span></div>
+            <div class="bar-col"><div class="bar-fill" style="height: 35%;"></div><span class="bar-day">S</span></div>
+            <div class="bar-col"><div class="bar-fill" style="height: 60%;"></div><span class="bar-day">D</span></div>
+          </div>
+
+          <div class="summary-footer">
+            <span class="bullet-dot"></span>
+            <span>Reportes de campo sincronizados</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
   </div>
 </ion-content>
+
+<ion-footer class="ion-no-border bottom-navbar">
+  <div class="bottom-nav-row">
+    <div class="nav-tab-item active" routerLink="/home">
+      <ion-icon name="home"></ion-icon>
+      <span>Resumen</span>
+    </div>
+
+    <div class="nav-tab-item" routerLink="/incidents-list">
+      <ion-icon name="list"></ion-icon>
+      <span>Incidencias</span>
+    </div>
+
+    <div class="nav-tab-item" [routerLink]="['/incidents-list']" [queryParams]="{ filtro: 'seguimiento' }">
+      <ion-icon name="bookmark"></ion-icon>
+      <span>Seguimiento</span>
+      <span class="tab-badge" *ngIf="seguimientosIds.length > 0">{{ seguimientosIds.length }}</span>
+    </div>
+
+    <div class="field-mode-indicator">
+      <span class="mode-dot"></span>
+      <span>Modo campo activo</span>
+    </div>
+  </div>
+</ion-footer>
+
+<ion-modal [isOpen]="mostrarModalRegistroRapido" (didDismiss)="cerrarModalRegistroRapido()" class="quick-reg-modal">
+  <ng-template>
+    <div class="quick-modal-card">
+      <div class="quick-modal-top">
+        <div class="quick-texts">
+          <span class="quick-tag">REGISTRO RÁPIDO</span>
+          <h2 class="quick-title">Nueva incidencia</h2>
+          <p class="quick-desc">El formulario completo se abrirá a continuación.</p>
+        </div>
+        <button class="quick-close-btn" (click)="cerrarModalRegistroRapido()">
+          <ion-icon name="close"></ion-icon>
+        </button>
+      </div>
+
+      <div class="quick-options-group">
+        <div class="quick-opt-card" (click)="seleccionarModoUbicacion('gps')">
+          <div class="opt-avatar avatar-gps">
+            <ion-icon name="locate"></ion-icon>
+          </div>
+          <div class="opt-info">
+            <h4 class="opt-title">Usar mi ubicación</h4>
+            <p class="opt-sub">Captura coordenadas para el reporte</p>
+          </div>
+          <ion-icon name="chevron-forward" class="opt-arrow"></ion-icon>
+        </div>
+
+        <div class="quick-opt-card" (click)="seleccionarModoUbicacion('manual')">
+          <div class="opt-avatar avatar-manual">
+            <ion-icon name="add"></ion-icon>
+          </div>
+          <div class="opt-info">
+            <h4 class="opt-title">Ingresar manualmente</h4>
+            <p class="opt-sub">Continúa sin ubicación automática</p>
+          </div>
+          <ion-icon name="chevron-forward" class="opt-arrow"></ion-icon>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>

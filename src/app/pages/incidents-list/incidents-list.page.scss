@@ -1,0 +1,229 @@
+.list-navbar {
+  ion-toolbar {
+    --background: #0b2545;
+    --color: #ffffff;
+  }
+}
+
+.search-toolbar {
+  --background: #0b2545;
+  --padding-top: 0;
+  --padding-bottom: 6px;
+
+  .custom-searchbar {
+    --background: rgba(255, 255, 255, 0.95);
+    --color: #0f172a;
+    --placeholder-color: #64748b;
+    --icon-color: #0b2545;
+    --border-radius: 12px;
+    --box-shadow: none;
+    padding: 0 14px;
+  }
+}
+
+.filter-toolbar {
+  --background: #0b2545 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  ion-segment {
+    --background: transparent;
+    padding: 2px 8px 6px 8px;
+
+    ion-segment-button {
+      --color: #94a3b8;
+      --color-checked: #ffffff;
+      --indicator-color: #38bdf8;
+      --indicator-box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+      min-height: 38px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      border-radius: 8px;
+      margin: 0 2px;
+
+      &.segment-button-checked {
+        --color: #ffffff;
+        font-weight: 800;
+      }
+
+      ion-icon {
+        font-size: 0.95rem;
+        margin-right: 4px;
+        color: #f59e0b;
+      }
+    }
+  }
+}
+
+.content-canvas {
+  --background: #f8fafc;
+}
+
+.loading-container,
+.error-container,
+.empty-container {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: #64748b;
+
+  ion-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0.5rem 0 0.25rem 0;
+  }
+
+  p {
+    font-size: 0.85rem;
+    margin: 0 0 1rem 0;
+  }
+}
+
+.mockup-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 900px;
+  margin: 0 auto;
+
+  .mockup-incident-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 14px 16px;
+    border: 1px solid #eef2f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+
+    &:active {
+      transform: scale(0.99);
+    }
+
+    .incident-type-avatar {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      background: #fef3c7;
+      color: #d97706;
+
+      &.bache        { background: #fee2e2; color: #dc2626; }
+      &.luminaria    { background: #fef3c7; color: #d97706; }
+      &.señalizacion { background: #e0f2fe; color: #0284c7; }
+      &.alcantarilla { background: #e6f7f2; color: #059669; }
+      &.parque       { background: #f3e8ff; color: #9333ea; }
+
+      .thumb-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+      }
+    }
+
+    .incident-main-data {
+      flex: 1;
+      min-width: 0;
+
+      .pills-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 4px;
+
+        .id-tag {
+          font-size: 0.72rem;
+          font-weight: 700;
+          color: #475569;
+        }
+
+        .status-pill {
+          font-size: 0.65rem;
+          font-weight: 700;
+          padding: 2px 8px;
+          border-radius: 6px;
+
+          &.pendiente  { background: #fef3c7; color: #b45309; }
+          &.en\ proceso{ background: #e0f2fe; color: #0369a1; }
+          &.resuelta   { background: #d1fae5; color: #047857; }
+        }
+      }
+
+      .incident-name {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 4px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .incident-location {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.75rem;
+        color: #64748b;
+
+        ion-icon {
+          font-size: 0.85rem;
+        }
+
+        span {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+
+    .incident-right-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+
+      .meta-time {
+        font-size: 0.7rem;
+        color: #94a3b8;
+      }
+
+      .meta-priority {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #64748b;
+      }
+
+      .heart-btn {
+        background: transparent;
+        border: none;
+        padding: 2px;
+        cursor: pointer;
+        font-size: 1.15rem;
+        color: #cbd5e1;
+
+        &.active {
+          color: #d97706;
+        }
+      }
+    }
+  }
+}
+
+ion-fab-button {
+  --background: #0b2545;
+  --color: #ffffff;
+}
