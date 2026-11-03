@@ -143,7 +143,8 @@
 
             
             <div class="incident-type-avatar" [ngClass]="item.tipo.toLowerCase()">
-              <ion-icon [name]="getIconoPorTipo(item.tipo)"></ion-icon>
+              <img *ngIf="item.foto" [src]="item.foto" alt="Evidencia" class="thumb-img" />
+              <ion-icon *ngIf="!item.foto" [name]="getIconoPorTipo(item.tipo)"></ion-icon>
             </div>
 
             

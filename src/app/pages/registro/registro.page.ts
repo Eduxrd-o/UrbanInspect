@@ -25,13 +25,30 @@ import {
   AlertController
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { camera, trash, location, cloudyNight, warning, save, locate, chevronForward, add } from 'ionicons/icons';
+import {
+  camera,
+  trash,
+  location,
+  cloudyNight,
+  warning,
+  save,
+  locate,
+  chevronForward,
+  add,
+  cloudDone,
+  cloudUploadOutline,
+  imageOutline,
+  checkmarkCircle,
+  informationCircleOutline
+} from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Geolocation } from '@capacitor/geolocation';
 import { StorageService } from '../../services/storage';
 import { WeatherData, WeatherService } from '../../services/weather';
 import { IncidentService } from '../../services/incidents';
+import { CloudinaryService } from '../../services/cloudinary';
 import { Router, ActivatedRoute } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-registro',
@@ -65,16 +82,18 @@ import { Router, ActivatedRoute } from '@angular/router';
   ]
 })
 export class RegistroPage implements OnInit {
-
   private fb = inject(FormBuilder);
   private weatherService = inject(WeatherService);
   private IncidentService = inject(IncidentService);
+  private cloudinaryService = inject(CloudinaryService);
   private storageService = inject(StorageService);
   private alertCtrl = inject(AlertController);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   climaData: WeatherData | null = null;
+  isSaving = false;
+  uploadStatusText = '';
 
   form: FormGroup = this.fb.group({
     tipo: ['', Validators.required],
@@ -88,6 +107,27 @@ export class RegistroPage implements OnInit {
   });
 
   private borradorChecked = false;
+
+  constructor() {
+    addIcons({
+      camera,
+      trash,
+      location,
+      'cloudy-night': cloudyNight,
+      cloudyNight,
+      warning,
+      save,
+      locate,
+      'chevron-forward': chevronForward,
+      chevronForward,
+      add,
+      cloudDone,
+      cloudUploadOutline,
+      imageOutline,
+      checkmarkCircle,
+      informationCircleOutline
+    });
+  }
 
   ngOnInit() {
     this.form.valueChanges.subscribe(val => {
@@ -140,23 +180,18 @@ export class RegistroPage implements OnInit {
     this.borradorChecked = false;
   }
 
-  constructor() {
-    addIcons({ camera, trash, location, 'cloudy-night': cloudyNight, cloudyNight, warning, save, locate, 'chevron-forward': chevronForward, chevronForward, add });
-  }
   async capturarFoto() {
     try {
       const image = await Camera.getPhoto({
-        quality: 45,
-        width: 600,
-        height: 600,
+        quality: 65,
+        width: 1024,
+        height: 1024,
         correctOrientation: true,
         resultType: CameraResultType.Base64,
         source: CameraSource.Camera
       });
       if (image?.base64String) {
-        const raw = `data:image/jpeg;base64,${image.base64String}`;
-        const compressed = await this.comprimirImagen(raw, 600, 0.45);
-        this.form.patchValue({ foto: compressed });
+        this.form.patchValue({ foto: `data:image/jpeg;base64,${image.base64String}` });
       }
     } catch (e) {
       this.abrirSelectorArchivo();
@@ -171,41 +206,13 @@ export class RegistroPage implements OnInit {
       const file = e.target?.files?.[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = async () => {
-          const raw = reader.result as string;
-          const compressed = await this.comprimirImagen(raw, 600, 0.45);
-          this.form.patchValue({ foto: compressed });
+        reader.onload = () => {
+          this.form.patchValue({ foto: reader.result as string });
         };
         reader.readAsDataURL(file);
       }
     };
     input.click();
-  }
-
-  private comprimirImagen(dataUrl: string, maxWidth = 600, quality = 0.45): Promise<string> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', quality));
-        } else {
-          resolve(dataUrl);
-        }
-      };
-      img.onerror = () => resolve(dataUrl);
-      img.src = dataUrl;
-    });
   }
 
   limpiarFoto() {
@@ -249,8 +256,6 @@ export class RegistroPage implements OnInit {
     await alert.present();
   }
 
-  isSaving = false;
-
   async guardar() {
     if (this.isSaving) return;
 
@@ -282,13 +287,26 @@ export class RegistroPage implements OnInit {
     }
 
     this.isSaving = true;
-    let fotoFinal = val.foto;
-    if (fotoFinal && typeof fotoFinal === 'string' && fotoFinal.startsWith('data:image')) {
-      fotoFinal = await this.comprimirImagen(fotoFinal, 600, 0.45);
+    let fotoUrlFinal = val.foto || '';
+
+    if (fotoUrlFinal && typeof fotoUrlFinal === 'string' && fotoUrlFinal.startsWith('data:image')) {
+      this.uploadStatusText = 'Subiendo evidencia a Cloudinary...';
+      try {
+        fotoUrlFinal = await firstValueFrom(this.cloudinaryService.subirImagen(fotoUrlFinal));
+      } catch (uploadError) {
+        console.error('Error Cloudinary:', uploadError);
+        this.isSaving = false;
+        this.uploadStatusText = '';
+        await this.mostrarToast('No se pudo subir la fotografía a Cloudinary. Verifica tu conexión e intenta de nuevo.', 'danger');
+        return;
+      }
     }
+
+    this.uploadStatusText = 'Guardando en servicio de oficina...';
+
     const payload = {
       ...val,
-      foto: fotoFinal,
+      foto: fotoUrlFinal,
       fecha: new Date().toISOString(),
       estado: 'pendiente'
     };
@@ -297,12 +315,14 @@ export class RegistroPage implements OnInit {
       next: async () => {
         await this.storageService.clearBorrador();
         this.isSaving = false;
+        this.uploadStatusText = '';
         await this.mostrarToast('Incidencia registrada con éxito en el sistema.', 'success');
         this.router.navigate(['/incidents-list']);
       },
       error: async (err) => {
         console.error('Error al guardar incidencia:', err);
         this.isSaving = false;
+        this.uploadStatusText = '';
         await this.mostrarToast('Error al conectar con la oficina. Revisa tu conexión a internet.', 'danger');
       }
     });

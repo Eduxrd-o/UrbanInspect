@@ -10,7 +10,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="ion-padding content-canvas">
   <div *ngIf="isLoading" class="ion-text-center ion-padding detail-loading">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
     <p>Cargando información del caso...</p>
@@ -26,15 +26,41 @@
   </div>
 
   <div *ngIf="!isLoading && incident" class="detail-container">
-    
+
     <div class="photo-banner" *ngIf="incident.foto">
       <img [src]="incident.foto" alt="Evidencia Fotográfica" />
+      <div class="photo-cloud-badge" *ngIf="incident.foto.includes('cloudinary')">
+        <ion-icon name="cloud-done"></ion-icon>
+        <span>Cloudinary HD</span>
+      </div>
     </div>
     <div class="no-photo-banner" *ngIf="!incident.foto">
       <ion-icon name="image-outline"></ion-icon>
       <span>Sin fotografía adjunta</span>
     </div>
 
+    <div class="state-stepper">
+      <div class="state-step active">
+        <div class="step-circle step-pendiente">
+          <ion-icon name="alert-circle"></ion-icon>
+        </div>
+        <span class="step-label">Pendiente</span>
+      </div>
+      <div class="state-step-line" [class.active]="incident.estado === 'en proceso' || incident.estado === 'resuelta'"></div>
+      <div class="state-step" [class.active]="incident.estado === 'en proceso' || incident.estado === 'resuelta'">
+        <div class="step-circle step-en-proceso">
+          <ion-icon name="construct"></ion-icon>
+        </div>
+        <span class="step-label">En Proceso</span>
+      </div>
+      <div class="state-step-line" [class.active]="incident.estado === 'resuelta'"></div>
+      <div class="state-step" [class.active]="incident.estado === 'resuelta'">
+        <div class="step-circle step-resuelta">
+          <ion-icon name="checkmark-done"></ion-icon>
+        </div>
+        <span class="step-label">Resuelta</span>
+      </div>
+    </div>
 
     <div class="detail-header-card">
       <div class="tags-row">
@@ -115,7 +141,7 @@
     </ion-card>
 
     <div class="actions-section">
-      <h2 class="actions-title">Gestión de Estado </h2>
+      <h2 class="actions-title">Gestión de Estado</h2>
 
       <div *ngIf="incident.estado === 'pendiente'" class="action-buttons-group">
         <ion-button expand="block" color="warning" class="action-btn" (click)="pasarAEnProceso()">

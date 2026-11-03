@@ -1,6 +1,7 @@
-
-
 export const environment = {
-  production: false
+  production: false,
+  cloudinary: {
+    cloudName: 'dujgwv74b',
+    uploadPreset: 'urbaninspect'
+  }
 };
-
