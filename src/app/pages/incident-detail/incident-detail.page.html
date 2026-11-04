@@ -129,7 +129,7 @@
       </ion-card-content>
     </ion-card>
 
-    <ion-card class="info-card resolved-card" *ngIf="incident.observacion">
+    <ion-card class="info-card resolved-card" *ngIf="incident.estado === 'resuelta' && incident.observacion">
       <ion-card-header>
         <ion-card-subtitle color="success">
           <ion-icon name="checkmark-done"></ion-icon> Observación de Resolución

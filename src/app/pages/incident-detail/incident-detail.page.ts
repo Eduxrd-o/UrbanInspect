@@ -172,7 +172,7 @@ export class IncidentDetailPage implements OnInit {
 
     const alert = await this.alertCtrl.create({
       header: 'Resolver Incidencia',
-      subHeader: 'Requisito R9: Ingrese la observación de resolución obligatoria.',
+      subHeader: 'Ingrese la observación de resolución obligatoria.',
       inputs: [
         {
           name: 'obs',
