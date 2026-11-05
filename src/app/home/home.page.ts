@@ -11,6 +11,7 @@ import {
   IonSpinner,
   IonFooter,
   IonModal,
+  AlertController
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
@@ -45,10 +46,12 @@ import {
   chevronForward,
   home,
   calendarOutline,
+  logOutOutline
 } from 'ionicons/icons';
 import { IncidentService, Incident } from '../services/incidents';
 import { WeatherService, WeatherData } from '../services/weather';
 import { StorageService } from '../services/storage';
+import { AuthService } from '../services/auth-service';
 
 @Component({
   selector: 'app-home',
@@ -73,6 +76,8 @@ export class HomePage implements OnInit {
   private incidentService = inject(IncidentService);
   private weatherService = inject(WeatherService);
   private storageService = inject(StorageService);
+  private authService = inject(AuthService);
+  private alertCtrl = inject(AlertController);
   private router = inject(Router);
 
   totalCount = 0;
@@ -83,6 +88,7 @@ export class HomePage implements OnInit {
   recentIncidents: Incident[] = [];
   seguimientosIds: string[] = [];
   fechaHoy: Date = new Date();
+  usuarioEmail = '';
 
   isLoading = false;
   climaQuito: WeatherData | null = null;
@@ -138,15 +144,18 @@ export class HomePage implements OnInit {
       heartOutline,
       timeOutline,
       flashlightOutline,
-      calendarOutline
+      calendarOutline,
+      logOutOutline
     });
   }
 
   ngOnInit() {
+    this.usuarioEmail = this.authService.getUser()?.email || '';
     this.cargarDatos();
   }
 
   async ionViewWillEnter() {
+    this.usuarioEmail = this.authService.getUser()?.email || '';
     this.seguimientosIds = await this.storageService.seguimientoIds();
     this.cargarDatos();
   }
@@ -205,6 +214,29 @@ export class HomePage implements OnInit {
 
   handleRefresh(event: any) {
     this.cargarDatos(event);
+  }
+
+  async confirmarCerrarSesion() {
+    const alert = await this.alertCtrl.create({
+      header: 'Cerrar Sesión',
+      subHeader: this.usuarioEmail ? `Inspector: ${this.usuarioEmail}` : undefined,
+      message: '¿Está seguro de que desea cerrar la sesión actual?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Cerrar Sesión',
+          role: 'destructive',
+          handler: async () => {
+            await this.authService.logout();
+            this.router.navigate(['/login'], { replaceUrl: true });
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   colorEstado(estado?: string): string {

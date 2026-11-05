@@ -20,7 +20,10 @@
         <button class="icon-circle-btn" (click)="cargarDatos()">
           <ion-icon name="refresh-outline"></ion-icon>
         </button>
-        <div class="user-profile-badge">
+        <button class="icon-circle-btn logout-circle-btn" (click)="confirmarCerrarSesion()" title="Cerrar sesión">
+          <ion-icon name="log-out-outline"></ion-icon>
+        </button>
+        <div class="user-profile-badge" (click)="confirmarCerrarSesion()" style="cursor: pointer;">
           <div class="user-avatar">
             <img src="assets/escudo.png" alt="Escudo Quito" class="avatar-img-escudo" />
           </div>
@@ -42,6 +45,10 @@
         <div class="mobile-date-badge">
           <ion-icon name="calendar-outline"></ion-icon>
           <span>{{ fechaHoy | date:"EEEE, d 'de' MMMM" | titlecase }}</span>
+        </div>
+        <div class="inspector-badge" *ngIf="usuarioEmail">
+          <ion-icon name="person-circle-outline"></ion-icon>
+          <span>Inspector: {{ usuarioEmail }}</span>
         </div>
         <h1 class="welcome-title">Todo bajo control.</h1>
         <p class="welcome-desc">Revisa las novedades de tu zona de inspección.</p>

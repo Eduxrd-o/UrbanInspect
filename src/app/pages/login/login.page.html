@@ -1,0 +1,98 @@
+<ion-content class="login-canvas" [fullscreen]="true">
+  <div class="login-wrapper">
+
+    <div class="login-header">
+      <div class="brand-badge">
+        <img src="assets/logo-dmq.svg" alt="DMQ" class="dmq-logo" />
+        <div class="brand-info">
+          <span class="brand-title">UrbanInspect</span>
+          <span class="brand-subtitle">DISTRITO METROPOLITANO DE QUITO</span>
+        </div>
+      </div>
+      <h1 class="welcome-heading">Sistema de Control e Inspección</h1>
+      <p class="welcome-caption">Acceso oficial para inspectores municipales</p>
+    </div>
+
+    <ion-card class="login-card">
+      <ion-card-header>
+        <ion-segment [value]="modo" (ionChange)="cambiarModo($any($event).detail.value)" mode="ios" class="auth-segment">
+          <ion-segment-button value="login">
+            <ion-label>Iniciar Sesión</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="register">
+            <ion-label>Registrarse</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+
+        <ion-card-title class="card-title-text">
+          {{ modo === 'login' ? 'Ingreso al Sistema' : 'Registro de Inspector' }}
+        </ion-card-title>
+        <ion-card-subtitle>
+          {{ modo === 'login' ? 'Ingrese sus credenciales registradas' : 'Cree su cuenta con correo institucional' }}
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form [formGroup]="authForm" (ngSubmit)="onSubmit()">
+
+          <div class="input-group">
+            <label class="field-label">Correo Electrónico</label>
+            <div class="input-wrapper" [class.has-error]="authForm.get('email')?.invalid && authForm.get('email')?.touched">
+              <ion-icon name="mail-outline" class="field-icon"></ion-icon>
+              <input
+                type="email"
+                formControlName="email"
+                placeholder="inspector@quito.gob.ec"
+                class="native-input" />
+            </div>
+            <span class="error-hint" *ngIf="authForm.get('email')?.invalid && authForm.get('email')?.touched">
+              Ingrese un correo electrónico válido
+            </span>
+          </div>
+
+          <div class="input-group">
+            <label class="field-label">Contraseña</label>
+            <div class="input-wrapper" [class.has-error]="authForm.get('password')?.invalid && authForm.get('password')?.touched">
+              <ion-icon name="lock-closed-outline" class="field-icon"></ion-icon>
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="password"
+                placeholder="Mínimo 6 caracteres"
+                class="native-input" />
+              <button type="button" class="eye-btn" (click)="togglePassword()">
+                <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+              </button>
+            </div>
+            <span class="error-hint" *ngIf="authForm.get('password')?.invalid && authForm.get('password')?.touched">
+              La contraseña debe tener al menos 6 caracteres
+            </span>
+          </div>
+
+          <div class="error-banner" *ngIf="errorMessage">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <span>{{ errorMessage }}</span>
+          </div>
+
+          <button
+            type="submit"
+            class="submit-button"
+            [disabled]="isLoading || authForm.invalid">
+            <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+            <ng-container *ngIf="!isLoading">
+              <ion-icon [name]="modo === 'login' ? 'log-in-outline' : 'person-add-outline'"></ion-icon>
+              <span>{{ modo === 'login' ? 'Acceder al Panel' : 'Crear Cuenta' }}</span>
+            </ng-container>
+          </button>
+
+        </form>
+
+        <div class="security-footer">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+          <span>Autenticación Segura · Firebase Auth</span>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+  </div>
+</ion-content>
+

@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "urbaninspect-f2",
+    "inspect": "urbaninspect-f2"
+  },
+  "targets": {},
+  "etags": {}
+}

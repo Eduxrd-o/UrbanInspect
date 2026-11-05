@@ -68,3 +68,8 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+.agents/
+.claude/
+scratch/
+skills-lock.json
+*skills*.json

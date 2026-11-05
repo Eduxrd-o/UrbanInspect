@@ -95,6 +95,16 @@
           color: #64748b;
           font-size: 1.1rem;
           cursor: pointer;
+
+          &.logout-circle-btn {
+            color: #dc2626;
+            border-color: #fecaca;
+            background: #fff5f5;
+
+            &:hover {
+              background: #fee2e2;
+            }
+          }
         }
 
         .user-profile-badge {
@@ -179,6 +189,24 @@
 
       ion-icon {
         font-size: 0.95rem;
+      }
+    }
+
+    .inspector-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #0f766e;
+      background: #ccfbf1;
+      padding: 4px 10px;
+      border-radius: 8px;
+      width: fit-content;
+      margin-bottom: 8px;
+
+      ion-icon {
+        font-size: 1rem;
       }
     }
 
